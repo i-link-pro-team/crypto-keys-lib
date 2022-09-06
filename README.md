@@ -1,4 +1,4 @@
-# crypto keys lib
+# Crypto keys lib
 
 features:
 - generate seed phrase
@@ -9,19 +9,13 @@ features:
 
 blockchains:
  - Bitcoin
- - BitcoinSV
- - BitcoinCash
  - Litecoin
  - Dogecoin
  - Ethereum
  - EOS
  - Ripple
- - Emercoin
  - Dashcoin
-
-# install
-
-npm i git+ssh://git@gitlab.i-link.pro:crypto-api/crypto-api-keys-lib
+ - Polkadot
 
 # Use example
 ```
@@ -50,16 +44,21 @@ encTest()
 ```
 import { Keys, Blockchain, Network } from "crypto-api-keys-lib";
 
-const keys = new Keys(Blockchain.BITCOIN, Network.MAINNET)
-const seed = keys.generateSeedPhrase(12)
+const check = async () => {
+    for (const key of Object.keys(Blockchain)) {
+        const keys = new Keys(Blockchain[key], Network.MAINNET)
+        const seed = keys.generateSeedPhrase(12)
 
-console.log({ seed })
+        // console.log({ seed })
 
-if (seed && !(seed instanceof Error)) {
-    const dkeys = keys.derivateKeys(
-        { masterPublicKey: seed.masterPublicKey },
-        { skip: 0, limit: 3, path: "m/44'/0'/0'/0/3" },
-    )
-    console.log({ dkeys })
+        if (seed && !(seed instanceof Error)) {
+            const dkeys = await keys.derivateKeys(
+                { masterPrivateKey: seed.masterAccountPrivateKey },
+                { skip: 0, limit: 1, path: '0/0' },
+            )
+            console.log({ key, dkeys })
+        }
+    }
 }
+check()
 ```

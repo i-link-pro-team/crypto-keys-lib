@@ -1,6 +1,6 @@
 {
     "name": "crypto-api-keys-lib",
-    "version": "1.3.2",
+    "version": "0.0.8",
     "description": "",
     "license": "MIT",
     "author": "noa",
@@ -12,7 +12,8 @@
         "build": "tsdx build --tsconfig ./tsconfig.build.json",
         "test": "mocha -r ts-node/register 'tests/**/*.ts'",
         "lint:ts": "eslint \"{src,tests}/**/*.ts\" --fix --plugin tsc --rule 'tsc/config: [2, {configFile: \"./tsconfig.json\"}]'",
-        "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
+        "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+        "release": "standard-version -a"
     },
     "engines": {
         "node": ">=10"
@@ -22,36 +23,38 @@
         "src"
     ],
     "dependencies": {
+        "@ethereumjs/tx": "3.5.0",
+        "@polkadot/api": "^4.15.1",
         "bchaddrjs": "^0.4.8",
         "bip32": "^2.0.5",
         "bip39": "^3.0.2",
-        "bitcoinjs-lib": "git+http://packages:5m-z_t2b6HQVNQUL9oxv@gitlab.i-link.pro/crypto-api/bitcoinjs-lib.git",
+        "bitcoinjs-lib": "^5.2.0",
         "create-hash": "^1.2.0",
+        "elliptic": "^6.5.4",
         "eosjs": "^21.0.3",
         "eosjs-ecc": "^4.0.7",
         "ethereumjs-tx": "^2.1.2",
         "ethereumjs-util": "^7.0.2",
-        "node-fetch": "^2.6.1",
+        "ethers": "^5.5.1",
+        "node-fetch": "^2.6.7",
         "ripple-address-codec": "^4.1.1",
         "ripple-keypairs": "^1.0.1",
         "ripple-lib": "1.6.0",
         "sodium-plus": "^0.7.1",
-        "wallet-address-validator": "git+http://deploy:5m-z_t2b6HQVNQUL9oxv@gitlab.i-link.pro/crypto-api/wallet-address-validator.git"
+        "wallet-address-validator": "^0.2.4"
     },
     "devDependencies": {
-        "sinon": "^9.0.2",
-        "@types/sinon": "^9.0.4",
         "@commitlint/cli": "^8.3.5",
         "@commitlint/config-conventional": "^8.3.4",
         "@types/bchaddrjs": "^0.4.0",
         "@types/bip32": "^2.0.0",
         "@types/bip39": "^3.0.0",
-        "@types/bitcoinjs-lib": "^5.0.0",
         "@types/chai": "^4.2.11",
         "@types/create-hash": "^1.2.2",
         "@types/ethereumjs-util": "^6.1.0",
         "@types/mocha": "^7.0.2",
         "@types/node": "^14.0.4",
+        "@types/sinon": "^9.0.4",
         "@typescript-eslint/eslint-plugin": "^2.23.0",
         "@typescript-eslint/parser": "^2.23.0",
         "chai": "^4.2.0",
@@ -62,10 +65,18 @@
         "husky": "^4.2.5",
         "mocha": "^7.2.0",
         "prettier": "^1.19.1",
+        "replace-in-file": "^6.1.0",
+        "sinon": "^9.0.2",
+        "standard-version": "^9.0.0",
         "tinyify": "^2.5.2",
         "ts-node": "^8.10.2",
-        "tsdx": "^0.13.2",
+        "tsdx": "^0.14.1",
         "tslib": "^2.0.0",
         "typescript": "^3.9.3"
+    },
+    "standard-version": {
+        "scripts": {
+            "precommit": "node version-bump-in-files.release.js && git add README.md"
+        }
     }
 }
