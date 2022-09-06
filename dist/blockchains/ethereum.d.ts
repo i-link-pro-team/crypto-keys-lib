@@ -1,6 +1,6 @@
-import { BitcoinBase } from './bitcoin-base';
-import { Blockchain, Network } from '../types';
 import { BIP32Interface } from 'bip32';
+import { Blockchain, Network } from '../types';
+import { BitcoinBase } from './bitcoin-base';
 export declare class Ethereum extends BitcoinBase {
     protected networks: {
         mainnet: {
@@ -16,13 +16,13 @@ export declare class Ethereum extends BitcoinBase {
             config: import("../network-configs").Network;
         };
     };
-    private net;
+    protected net: Network;
     constructor(network: Network);
     getPublicFromPrivate(privateKey: string): string;
     getPrivateKey(privateKey: BIP32Interface): string;
     getPublicKey(publicKey: string): string;
     getAddressFromPublic(publicKey: string): string;
-    sign(data: string, privateKey: string, isTx?: boolean): Promise<string>;
+    sign(data: string, privateKey: string, isTx?: boolean, addMessagePrefix?: boolean): Promise<string>;
     checkSign(_: string, __: string, sign: string): boolean;
     isValidAddress(address: string): boolean;
 }

@@ -1,8 +1,6 @@
 import { Bitcoin } from '../src/blockchains/bitcoin'
 import { Network, Blockchain } from '../src/types'
 import { Keys } from '../src/lib'
-import { BitcoinCash } from '../src/blockchains/bitcoin-cash'
-import { BitcoinSV } from '../src/blockchains/bitcoinsv'
 import { Ethereum } from '../src/blockchains/ethereum'
 import { Litecoin } from '../src/blockchains/litecoin'
 import { Ripple } from '../src/blockchains/ripple'
@@ -11,16 +9,16 @@ import { describe, it } from 'mocha'
 import * as assert from 'assert'
 import { BitcoinBase } from '../src/blockchains/bitcoin-base'
 
-const generateAddress = (
+const generateAddress = async (
     network: Network,
     blockchain: Blockchain,
     testCallback: (publicKey: string) => void,
 ) => {
     const keys = new Keys(blockchain, network)
-    const seed = keys.generateSeedPhrase(12)
+    const seed = await keys.generateSeedPhrase(12)
 
     if (seed && !(seed instanceof Error)) {
-        const dkeys = keys.derivateKeys(
+        const dkeys = await keys.derivateKeys(
             { masterPublicKey: seed.masterPublicKey },
             { skip: 0, limit: 1, path: "m/44'/0'/0'/0/3" },
         )
@@ -46,54 +44,6 @@ describe('Bitcoin Address Validator', () => {
     describe('Bitcoin TESTNET', () => {
         generateAddress(Network.TESTNET, Blockchain.BTC, publicKey => {
             const instance = new Bitcoin(Network.TESTNET)
-            const address = instance.getAddressFromPublic(publicKey)
-
-            it('Should generate valid address', () => {
-                assert.equal(instance.isValidAddress(address), true)
-            })
-        })
-    })
-})
-
-describe('BCH Address Validator', () => {
-    describe('BitcoinCash MAINNET', () => {
-        generateAddress(Network.MAINNET, Blockchain.BCH, publicKey => {
-            const instance = new BitcoinCash(Network.MAINNET)
-            const address = instance.getAddressFromPublic(publicKey)
-
-            it('Should generate valid address', () => {
-                assert.equal(instance.isValidAddress(address), true)
-            })
-        })
-    })
-
-    describe('BitcoinCash TESTNET', () => {
-        generateAddress(Network.TESTNET, Blockchain.BCH, publicKey => {
-            const instance = new BitcoinCash(Network.TESTNET)
-            const address = instance.getAddressFromPublic(publicKey)
-
-            it('Should generate valid address', () => {
-                assert.equal(instance.isValidAddress(address), true)
-            })
-        })
-    })
-})
-
-describe('BSV Address Validator', () => {
-    describe('BitcoinSV MAINNET', () => {
-        generateAddress(Network.MAINNET, Blockchain.BSV, publicKey => {
-            const instance = new BitcoinSV(Network.MAINNET)
-            const address = instance.getAddressFromPublic(publicKey)
-
-            it('Should generate valid address', () => {
-                assert.equal(instance.isValidAddress(address), true)
-            })
-        })
-    })
-
-    describe('BitcoinSV TESTNET', () => {
-        generateAddress(Network.TESTNET, Blockchain.BSV, publicKey => {
-            const instance = new BitcoinSV(Network.TESTNET)
             const address = instance.getAddressFromPublic(publicKey)
 
             it('Should generate valid address', () => {

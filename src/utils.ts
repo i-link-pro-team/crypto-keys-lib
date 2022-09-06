@@ -1,6 +1,9 @@
 import * as bip39 from 'bip39'
 import baseX from 'base-x'
 import createHash from 'create-hash'
+import { Blockchain } from './types'
+import { mnemonicToMiniSecret } from '@polkadot/util-crypto'
+import { u8aToHex } from '@polkadot/util'
 
 export const validateMnemonic = (mnemonic: string): boolean =>
     bip39.validateMnemonic(mnemonic)
@@ -8,7 +11,13 @@ export const validateMnemonic = (mnemonic: string): boolean =>
 export const mnemonicToSeedHex = (
     mnemonic: string,
     password?: string,
-): string => bip39.mnemonicToSeedSync(mnemonic, password).toString('hex')
+    blockchain?: Blockchain,
+): string => {
+    if (blockchain === Blockchain.DOT) {
+        return u8aToHex(mnemonicToMiniSecret(mnemonic, password))
+    }
+    return bip39.mnemonicToSeedSync(mnemonic, password).toString('hex')
+}
 
 export const generateMnemonic = (length: 12 | 24, lang = 'english'): string => {
     let strength = 128

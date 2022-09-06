@@ -20,34 +20,35 @@ import {
 
 import { generateMnemonic, validateMnemonic, mnemonicToSeedHex } from './utils'
 import { Bitcoin } from './blockchains/bitcoin'
-import { BitcoinSV } from './blockchains/bitcoinsv'
-import { BitcoinCash } from './blockchains/bitcoin-cash'
 import { Litecoin } from './blockchains/litecoin'
 import { Dogecoin } from './blockchains/dogecoin'
 import { Ethereum } from './blockchains/ethereum'
 import { EOS } from './blockchains/eos'
 import { Ripple } from './blockchains/ripple'
-import { Emercoin } from './blockchains/emercoin'
 import { Dashcoin } from './blockchains/dashcoin'
+import { Polkadot } from './blockchains/polkadot'
+import { Binance } from './blockchains/binance'
+import { Tron } from './blockchains/tron'
 
 const blockchainLibs = {
     bitcoin: Bitcoin,
     litecoin: Litecoin,
     // eslint-disable-next-line @typescript-eslint/camelcase
-    bitcoin_sv: BitcoinSV,
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    bitcoin_cash: BitcoinCash,
+    binance_smart_chain: Binance,
     ethereum: Ethereum,
     eos: EOS,
     ripple: Ripple,
     dogecoin: Dogecoin,
-    emercoin: Emercoin,
     dashcoin: Dashcoin,
+    polkadot: Polkadot,
+    tron: Tron,
 }
 
 export class Keys implements IKeys {
     private lib: any
+    private blockchain: Blockchain
     constructor(blockchain: Blockchain, network: Network) {
+        this.blockchain = blockchain
         if (blockchainLibs[blockchain]) {
             this.lib = new blockchainLibs[blockchain](network)
         } else {
@@ -55,13 +56,13 @@ export class Keys implements IKeys {
         }
     }
 
-    private getMasterFromSeed(
+    private async getMasterFromSeed(
         seedPhrase: string,
         path?: string,
         password?: string,
-    ) {
-        const seed = mnemonicToSeedHex(seedPhrase, password)
-        const keys = this.lib.getMasterAddressFromSeed(seed, path)
+    ): Promise<SeedWithKeys> {
+        const seed = mnemonicToSeedHex(seedPhrase, password, this.blockchain)
+        const keys = await this.lib.getMasterAddressFromSeed(seed, path)
         return {
             seedPhrase,
             seed,
@@ -81,41 +82,44 @@ export class Keys implements IKeys {
         return (from as FromMasterPrivateKey).masterPrivateKey !== undefined
     }
 
-    generateSeedPhrase(
+    async generateSeedPhrase(
         wordCount: 12 | 24,
         lang: SeedDictionaryLang = SeedDictionaryLang.ENGLISH,
         path?: string,
         password?: string,
-    ): SeedWithKeys | Error {
+    ): Promise<SeedWithKeys | Error> {
         const seedPhrase = generateMnemonic(wordCount, lang)
 
         return this.getMasterFromSeed(seedPhrase, path, password)
     }
 
-    getDataFromSeed(
+    async getDataFromSeed(
         seedPhrase: string,
         path?: string,
         password?: string,
-    ): SeedWithKeys | Error {
+    ): Promise<SeedWithKeys | Error> {
         return this.getMasterFromSeed(seedPhrase, path, password)
     }
 
-    derivateKeys(
+    async derivateKeys(
         from: FromSeedPhrase | FromMasterPublicKey | FromMasterPrivateKey,
         pathCursor: PathCursor,
-    ): KeysWithPath[] | Error {
+    ): Promise<KeysWithPath[] | Error> {
         if (this.isSeed(from)) {
-            const seedData = this.getMasterFromSeed(
+            const seedData = await this.getMasterFromSeed(
                 from.seedPhrase,
                 from.password,
             )
+            // console.log(seedData)
             if (pathCursor.path && pathCursor.path.indexOf('m') !== -1) {
+                console.log('From seed from full path')
                 // if full path use master key
                 return this.lib.derivateFromPrivate(
                     seedData.masterPrivateKey,
                     pathCursor,
                 )
             } else {
+                console.log('From seed from short path')
                 // if short path use master account key
                 return this.lib.derivateFromPrivate(
                     seedData.masterAccountPrivateKey,
@@ -136,8 +140,9 @@ export class Keys implements IKeys {
         data: string,
         privateKey: PrivateKey,
         isTx = true,
+        addMessagePrefix = true,
     ): Promise<string | Error> {
-        return await this.lib.sign(data, privateKey, isTx)
+        return await this.lib.sign(data, privateKey, isTx, addMessagePrefix)
     }
 
     getPublicFromPrivate(privateKey: PrivateKey): PublicKey | Error {

@@ -1,10 +1,16 @@
-import { BitcoinBase } from './bitcoin-base'
-import { Blockchain, Network } from '../types'
-import { bitcoin } from '../network-configs'
-import * as ethUtil from 'ethereumjs-util'
 import { BIP32Interface } from 'bip32'
+import * as ethUtil from 'ethereumjs-util'
+import {
+    FeeMarketEIP1559Transaction,
+    FeeMarketEIP1559TxData,
+    Transaction,
+    TxData,
+} from '@ethereumjs/tx'
+import Common, { Chain, Hardfork } from '@ethereumjs/common'
 
-const ethTx = require('ethereumjs-tx').Transaction
+import { Blockchain, Network } from '../types'
+import { BitcoinBase } from './bitcoin-base'
+import { bitcoin } from '../network-configs'
 
 export class Ethereum extends BitcoinBase {
     protected networks = {
@@ -21,7 +27,7 @@ export class Ethereum extends BitcoinBase {
             config: bitcoin.testnet,
         },
     }
-    private net: Network
+    protected net: Network
 
     constructor(network: Network) {
         super(network)
@@ -59,25 +65,41 @@ export class Ethereum extends BitcoinBase {
         return address
     }
 
-    async sign(data: string, privateKey: string, isTx = true): Promise<string> {
-        if (isTx) {
-            const privateKeyString: string = Object.values(
-                JSON.parse(privateKey),
-            )[0].toString()
+    async sign(
+        data: string,
+        privateKey: string,
+        isTx = true,
+        addMessagePrefix = true,
+    ): Promise<string> {
+        const [privateKeyString] = Object.values(
+            JSON.parse(privateKey),
+        ) as string[]
 
-            const chain = this.net === Network.MAINNET ? 'mainnet' : 'ropsten'
-            const transactionObject = JSON.parse(data)
-            const txRaw = new ethTx(transactionObject, { chain: chain })
-            const pk = Buffer.from(privateKeyString.replace('0x', ''), 'hex')
-            txRaw.sign(pk)
-            return `0x${txRaw.serialize().toString('hex')}`
+        if (isTx) {
+            const chain =
+                this.net === Network.MAINNET ? Chain.Mainnet : Chain.Ropsten
+            const common = new Common({ chain, hardfork: Hardfork.London })
+            const transaction: TxData & FeeMarketEIP1559TxData = JSON.parse(
+                data,
+            )
+            const { gasPrice } = transaction
+            const rawTransaction = gasPrice
+                ? Transaction.fromTxData(transaction, { common })
+                : FeeMarketEIP1559Transaction.fromTxData(transaction, {
+                      common,
+                  })
+            const privateKeyBuffer = Buffer.from(
+                privateKeyString.replace('0x', ''),
+                'hex',
+            )
+            const signedTransaction = rawTransaction.sign(privateKeyBuffer)
+            return `0x${signedTransaction.serialize().toString('hex')}`
         }
 
-        const hash = ethUtil.hashPersonalMessage(Buffer.from(data))
-        const sign = ethUtil.ecsign(
-            hash,
-            Buffer.from(privateKey.replace('0x', ''), 'hex'),
-        )
+        const message = addMessagePrefix
+            ? ethUtil.hashPersonalMessage(Buffer.from(data))
+            : ethUtil.toBuffer(data)
+        const sign = ethUtil.ecsign(message, ethUtil.toBuffer(privateKeyString))
         return JSON.stringify({
             r: sign.r.toString('hex'),
             s: sign.s.toString('hex'),

@@ -55,14 +55,14 @@ const litecoin: NetworkConfig = {
         messagePrefix: '\x19Litecoin Signed Message:\n',
         bech32: 'ltc',
         bip32: {
-            public: 0x0488b21e,
-            private: 0x0488ade4,
+            public: 0x019da462,
+            private: 0x019d9cfe,
         },
         pubKeyHash: 0x30,
         scriptHash: 0x32,
         wif: 0xb0,
         dustThreshold: 0,
-        timeInTransaction: true,
+        timeInTransaction: false,
     },
     testnet: {
         messagePrefix: '\x18Litecoin Signed Message:\n',
@@ -109,50 +109,6 @@ const dogecoin: NetworkConfig = {
     },
 }
 
-const emercoin: NetworkConfig = {
-    mainnet: {
-        messagePrefix: '\x18Emercoin Signed Message:\n',
-        bech32: 'emc',
-        bip32: {
-            public: 0x0488b21e,
-            private: 0x0488ade4,
-        },
-        pubKeyHash: 0x00,
-        scriptHash: 0x05,
-        wif: 0x80,
-        dustThreshold: 50000,
-        timeInTransaction: true,
-        maximumFeeRate: 50000,
-    },
-    testnet: {
-        messagePrefix: '\x18Emercoin Signed Message:\n',
-        bech32: 'emc',
-        bip32: {
-            public: 0x043587cf,
-            private: 0x04358394,
-        },
-        pubKeyHash: 0x6f,
-        scriptHash: 0xc4,
-        wif: 0xef,
-        dustThreshold: 500,
-        timeInTransaction: true,
-        maximumFeeRate: 50000,
-    },
-    regtest: {
-        messagePrefix: '\x18Emercoin Signed Message:\n',
-        bech32: 'emc',
-        bip32: {
-            public: 0x043587cf,
-            private: 0x04358394,
-        },
-        pubKeyHash: 0x6f,
-        scriptHash: 0xc4,
-        wif: 0xef,
-        dustThreshold: 500,
-        timeInTransaction: true,
-    },
-}
-
 const dashcoin: NetworkConfig = {
     mainnet: {
         messagePrefix: '\x18Dashcoin Signed Message:\n',
@@ -183,10 +139,11 @@ const dashcoin: NetworkConfig = {
     },
 }
 
-const bitcoinsv: NetworkConfig = {
+// TODO fill correct values for polkadot
+const polkadot: NetworkConfig = {
     mainnet: {
         messagePrefix: 'unused',
-        bech32: 'bsv',
+        bech32: 'dot',
         bip32: {
             public: 0x0488b21e,
             private: 0x0488ade4,
@@ -199,7 +156,7 @@ const bitcoinsv: NetworkConfig = {
     },
     testnet: {
         messagePrefix: 'unused',
-        bech32: 'bsvtest',
+        bech32: 'dot',
         bip32: {
             public: 0x043587cf,
             private: 0x04358394,
@@ -212,4 +169,33 @@ const bitcoinsv: NetworkConfig = {
     },
 }
 
-export { bitcoin, litecoin, bitcoinsv, dogecoin, emercoin, dashcoin }
+const tron: NetworkConfig = {
+    mainnet: {
+        messagePrefix: '\x19TRON Signed Message:\n32', // x15 for tronlink x19 for others
+        bech32: 'bc',
+        bip32: {
+            public: 0x0488b21e, // xpub
+            private: 0x0488ade4, // xprv
+        },
+        pubKeyHash: 0x41, // T as first letter of address
+        scriptHash: 0x05, // unused
+        wif: 0x80, // unused
+        dustThreshold: 0,
+        timeInTransaction: false,
+    },
+    testnet: {
+        messagePrefix: '\x19TRON Signed Message:\n',
+        bech32: 'tb',
+        bip32: {
+            public: 0x043587cf, // tpub
+            private: 0x04358394, // tprv
+        },
+        pubKeyHash: 0x41,
+        scriptHash: 0x05,
+        wif: 0x80,
+        dustThreshold: 0,
+        timeInTransaction: false,
+    },
+}
+
+export { bitcoin, litecoin, dogecoin, dashcoin, polkadot, tron }

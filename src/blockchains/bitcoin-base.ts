@@ -219,7 +219,10 @@ export class BitcoinBase {
         return key.verify(Buffer.from(hash, 'hex'), Buffer.from(sign, 'hex'))
     }
 
-    getMasterAddressFromSeed(seed: string, path?: string): MasterKeys {
+    async getMasterAddressFromSeed(
+        seed: string,
+        path?: string,
+    ): Promise<MasterKeys> {
         const hdkey = bip32.fromSeed(
             Buffer.from(seed, 'hex'),
             this.networkConfig,
